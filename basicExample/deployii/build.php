@@ -40,7 +40,7 @@ return [
         'lastRunDatetime'  => 'now',
       ]],
       ['if', '(time() - $params["stored_lastRunTimestamp"] > 30)', [
-        ['out', 'Your last run this task more than 30 seconds ago: {{stored_lastRunDatetime}}!'],
+        ['out', 'You last run this task more than 30 seconds ago: {{stored_lastRunDatetime}}!'],
       ]],
       ['exec', 'pwd'],
       ['confirm', 'doContinue', 'Do you wish to continue?', true],
