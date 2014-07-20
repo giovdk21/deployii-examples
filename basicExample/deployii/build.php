@@ -37,7 +37,7 @@ return [
       ['out', 'Thank you for trying DeploYii :)', Console::FG_BLUE],
       ['loadJson', '@buildScripts/stored.json', 'stored', [ // default values:
         'lastRunTimestamp' => 0,
-        'lastRunDatetime'  => 'now',
+        'lastRunDatetime'  => 'never',
       ]],
       ['if', '(time() - $params["stored_lastRunTimestamp"] > 30)', [
         ['out', 'You last run this task more than 30 seconds ago: {{stored_lastRunDatetime}}!'],
