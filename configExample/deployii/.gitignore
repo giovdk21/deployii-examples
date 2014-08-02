@@ -1,0 +1,5 @@
+/build
+#/config.php # commented for the example; usually you don't want to commit your config file!
+/composer
+/composer.phar
+/composer.lock
