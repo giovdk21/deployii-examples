@@ -10,18 +10,17 @@
 namespace buildScripts\commands;
 
 use app\lib\BaseCommand;
-use app\lib\TaskRunner;
 use Yii;
 
 class TestCommand extends BaseCommand {
 
-    public static function run(& $cmdParams, & $params) {
+    public function run(& $cmdParams, & $params) {
 
         $res = true;
 
-        TaskRunner::$controller->stdout('Running Test Command');
+        $this->controller->stdout('Running Test Command');
+        $this->controller->stdout("\n");
 
-        TaskRunner::$controller->stdout("\n");
         return $res;
     }
 

@@ -4,7 +4,7 @@ use yii\helpers\Console;
 
 return [
 
-    'deployiiVersion' => '0.3.0',
+    'deployiiVersion' => '0.4.0',
 
     'require'         => ['example--recipe'],
 
@@ -47,13 +47,15 @@ return [
 
 //            ['copyDir', '@buildScripts', '@workspace/dest'],
 //            ['copyDir', '@buildScripts/source', '@workspace/dest'],
-//            ['copyDir', '@buildScripts', '@workspace/dest', 'source'],
-//            ['copyDir', '@buildScripts', '@workspace/dest', 'aaa'],
+//            ['copyDir', 'source', '@workspace/dest', '@buildScripts'],
+//            ['copyDir', 'aaa', '@workspace/dest', '@buildScripts'],
 
-            // this will print an error; see the fourth parameter:
-            ['copyDir', '@buildScripts', '@workspace/dest', ['source', 'test_{{test}}']],
+            ['copyDir', '@buildScripts/source_2', '@workspace/dest'],
 
-//            ['copyDir', '@buildScripts', '@workspace/dest', 'source', [
+            // this will print an error; see the second parameter:
+            ['copyDir', ['source', 'test_{{test}}'], '@workspace/dest', '@buildScripts'],
+
+//            ['copyDir', 'source', '@workspace/dest', '@buildScripts', [
 //                'except' => ['test1\.txt']
 //            ]],
         ],
@@ -70,6 +72,41 @@ return [
             ['exec', 'ls', '-ld @workspace/test*_{{test}}*'],
             ['rm', '@workspace/test_{{test}}.txt'],
             ['rmdir', '@workspace/test_dir_{{test}}'],
+        ],
+
+        'compress' => [
+            [
+                'compress',
+                ['source', '.gitignore', 'hello.txt', 'source_2/source_3'],
+                '@buildScripts/build/archive.tar',
+                '@buildScripts'
+            ],
+            [
+                'compress',
+                [
+                    '@buildScripts/source',
+                    '@buildScripts/.gitignore',
+                    '@buildScripts/hello.txt',
+                    '@buildScripts/source_2/source_3'
+                ],
+                '@buildScripts/build/archive2.tar'
+            ],
+            ['compress', '@buildScripts/source', '@buildScripts/build/archive3.tar'],
+            ['compress', '@buildScripts/hello.txt', '@buildScripts/build/archive4.tar'],
+            [
+                'compress',
+                ['source', '.gitignore', 'hello.txt', 'source_2/source_3'],
+                '@buildScripts/build/archive5.tar',
+                '@buildScripts',
+                'gz',
+                [
+                    'filter' => function ($path) {
+                            // only include files ending in .txt and directories
+                            return (is_dir($path) || preg_match("/\\.txt$/i", $path) === 1);
+                        }
+                ]
+            ],
+            ['exec', 'ls', '-lh @buildScripts/build/'],
         ],
 
     ],
