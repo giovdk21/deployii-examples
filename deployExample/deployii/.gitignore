@@ -3,5 +3,4 @@
 /composer
 /composer.phar
 /composer.lock
-file_to_be_moved.php
-dir_to_be_moved
+/downloaded*

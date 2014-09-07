@@ -6,7 +6,7 @@ $environments = ['local' => 'Local', 'dev' => 'Development', 'prod' => 'Producti
 
 return [
 
-    'deployiiVersion' => '0.4.0',
+    'deployiiVersion' => '0.5.0',
 
     'require'         => [
         'test--recipe',

@@ -4,7 +4,7 @@ use yii\helpers\Console;
 
 return [
 
-    'deployiiVersion' => '0.4.0',
+    'deployiiVersion' => '0.5.0',
 
     'require'         => ['example--recipe'],
 
@@ -107,6 +107,48 @@ return [
                 ]
             ],
             ['exec', 'ls', '-lh @buildScripts/build/'],
+        ],
+
+        'move' => [
+//            ['rm', '@buildScripts/source_2/file_to_be_moved.php'],
+            ['rmdir', '@buildScripts/source_2/dir_to_be_moved'],
+            ['exec', 'touch', '@buildScripts/file_to_be_moved.php'],
+            ['mkdir', '@buildScripts/dir_to_be_moved'],
+            ['mkdir', '@buildScripts/dir_to_be_overwritten'],
+            ['exec', 'touch', '@buildScripts/dir_to_be_overwritten/wont_be_overwritten.php'],
+            ['mv', '@buildScripts/exists.not', '@buildScripts/file_to_be_moved.php'],
+            ['mv', '@buildScripts/dir_to_be_moved', '@buildScripts/file_to_be_moved.php'],
+            ['mv', '@buildScripts/file_to_be_moved.php', '@buildScripts/source_2'],
+            ['mv', '@buildScripts/dir_to_be_moved', '@buildScripts/dir_to_be_overwritten', true],
+            ['rm', '@buildScripts/dir_to_be_overwritten/wont_be_overwritten.php'],
+            ['mv', '@buildScripts/dir_to_be_moved', '@buildScripts/dir_to_be_overwritten', true],
+            ['mv', '@buildScripts/dir_to_be_overwritten', '@buildScripts/dir_to_be_moved'],
+            ['mv', '@buildScripts/dir_to_be_moved', '@buildScripts/source_2'],
+        ],
+
+        'replace' => [
+            ['rmdir', '@buildScripts/build'],
+            ['copyDir', '@buildScripts/to_replace', '@buildScripts/build/replaced'],
+            [
+                'replaceInFiles',
+                ['directory', 'file.php'],
+                [
+                    [
+                        "'config_2'\\s*=>\\s*\\[([^\\]]*\\])",
+                        "'config_2' => [\n         'my_param' => 'changed!',\n     ]",
+                        'm' // multi-line
+                    ],
+                    ["'current_env'\\s*=>\\s*'#ENV#'", "'current_env' => 'local'", 'i'],
+                    ['// {now}',  function ($matches) { return '// '.date('H:i:s'); }],
+                ],
+                '@buildScripts/build/replaced',
+                [
+                    'filter' => function ($path) {
+                            // only include files ending in .php and directories
+                            return (is_dir($path) || preg_match("/\\.php/i", $path) === 1);
+                        }
+                ]
+            ],
         ],
 
     ],
