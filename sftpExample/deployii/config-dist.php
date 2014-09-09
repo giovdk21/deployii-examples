@@ -24,6 +24,12 @@ return [
             'sftpAuthMethod'          => 'key',
             'sftpUsername'            => 'testuser',
             'sftpKeyFile'             => '/home/username/.ssh/id_rsa',
+            // ---
+            // FTP connection (specific) config:
+            'ftp1.sftpConnectionType' => 'ftp',
+            'ftp1.sftpPort'           => '21',
+            'ftp1.sftpPassword'       => '',
+            'ftp1.sftpLabelColor'     => yii\helpers\Console::BG_PURPLE,
         ],
         'dev'    => [
 

@@ -7,7 +7,8 @@ return [
     'deployiiVersion' => '0.5.0',
 
     'require'         => [
-        'sftpConnect--command'
+        'sftpConnect--command',
+        'git--command',
     ],
 
     'params'          => [
@@ -15,103 +16,74 @@ return [
 
     'targets'         => [
 
+        // init the project locally
+        'init' => [
+            // ...
+        ],
+
         'default' => [
-            ['out', 'Available targets: test_sftp, test_ftp'],
-            // the default target will be replaced with a proper example ;-)
+            ['target', 'fetch'],
+            ['target', 'test'],
+            ['target', 'prepare'],
+            ['target', 'package'],
+            ['target', 'deploy'],
         ],
 
-        'test_sftp' => [
+        'clean' => [
+            ['rmdir', '@buildScripts/build'],
+        ],
+
+        // download the Yii 2 basic app into the build directory; this is just for the sake of this
+        // example as you would usually prepare the build from the source in your workspace.
+        'fetch' => [
+            ['target', 'clean'],
+            ['git', 'clone', 'https://github.com/yiisoft/yii2-app-basic.git', '@buildScripts/build', [
+                'depth' => 1,
+            ]],
+            ['rmdir', '@buildScripts/build/.git'],
+        ],
+
+        'test' => [
+            ['out', 'Hopefully one day this will be running some automated tests...', Console::FG_CYAN],
+        ],
+
+        'prepare' => [
+            ['rm', '@buildScripts/build/web/index-test.php'],
+            ['rm', '@buildScripts/build/composer.json'],
+            ['rm', '@buildScripts/build/requirements.php'],
+            ['rm', '@buildScripts/build/yii'],
+            ['rm', '@buildScripts/build/yii.bat'],
+            ['rmdir', '@buildScripts/build/tests'],
+            [
+                'replaceInFiles',
+                ['index.php'],
+                [
+                    ['defined\(\'YII_DEBUG\'\)', "// defined('YII_DEBUG')", 'i'],
+                    ['define\(\'YII_ENV\', \'(\w+)\'\);', "define('YII_ENV', '{{environment}}');", 'i'],
+                ],
+                '@buildScripts/build/web',
+            ],
+        ],
+
+        'package' => [
+            ['compress', '@buildScripts/build', '@buildScripts/build/build.tar'],
+        ],
+
+        // backup online files & database
+        'backup' => [
+            ['out', 'Ideally we should perform a backup at this stage...', Console::FG_PURPLE],
+        ],
+
+        'deploy' => [
+            ['target', 'backup'],
             ['sftpConnect', 'sftp1'],
-//            ['sftpMkdir', 'sftp1', 'deployii_test/files'],
-//            ['sftpList', 'sftp1', 'deployii_test/files'],
-//            ['sftpMkdir', 'sftp1', 'deployii_test/test_perm'],
-            ['sftpChdir', 'sftp1', 'deployii_test/files'],
-//            ['sftpMkdir', 'sftp1', 'test_rmdir'],
-//            ['sftpRmdir', 'sftp1', 'test_rmdir', true],
-//            ['sftpList', 'sftp1'],
-//            ['out', '{{sftp1.list}}'],
-//            ['sftpChmod', 'sftp1', ['0700' => ['../test_perm']]],
-            ['rmdir', '@buildScripts/build'],
-            ['sftpRmdir', 'sftp1', 'build', true],
-            ['copyDir', '@workspace', '@buildScripts/build', '', ['except' => ['deployii']]],
-            [
-                'sftpPut',
-                'sftp1',
-                ['build', 'test.txt'],
-                '.',
-                '@buildScripts',
-                false
-            ],
-            ['sftpMkdir', 'sftp1', 'subdir'],
-            [
-                'sftpPut',
-                'sftp1',
-                '*',
-                'subdir',
-                '@buildScripts/build',
-                false
-            ],
-            ['sftpRm', 'sftp1', 'subdir/stylesheets/sass/main.scss'],
-//            ['sftpRm', 'sftp1', 'subdir/stylesheets/sass/main.scss'], // returns a warning
-//            ['sftpRm', 'sftp1', 'subdir/stylesheets/sass'], // returns a warning
-//            ['sftpRm', 'sftp1', 'subdir/stylesheets/sass/not_found.scss'], // returns a warning
-            ['rmdir', '@buildScripts/downloaded'],
-            ['mkdir', '@buildScripts/downloaded'],
-            ['sftpGet', 'sftp1', 'subdir', '@buildScripts/downloaded'],
-            ['sftpGet', 'sftp1', 'subdir/index.html', '@buildScripts/downloaded/index2.html'],
-            ['sftpGet', 'sftp1', 'subdir/index.html', '@buildScripts/downloaded'], // skipped
-//            ['sftpGet', 'sftp1', 'subdir', '@buildScripts/downloaded/index.html'], // returns a error
-            ['sftpRm', 'sftp1', 'subdir/index2.html'],
-            ['sftpMv', 'sftp1', 'subdir/index.html', 'subdir/index2.html'],
-            // test sftpMv:
-//            ['sftpMv', 'sftp1', 'subdir/index.html', 'subdir/index2.html', true], // returns error (not supported)
-//            ['sftpMv', 'sftp1', 'subdir/aa', 'subdir/bb', true],
-//            ['sftpMv', 'sftp1', 'subdir/cc', 'subdir/dd'],
-//            ['sftpMv', 'sftp1', 'subdir/cc', 'subdir/dd'],
-//            ['sftpMv', 'sftp1', 'subdir/dd', 'subdir/ee'],
-//            ['sftpMv', 'sftp1', 'subdir/stylesheets', 'subdir/index2.html'],
-            ['sftpExec', 'sftp1', 'ls', '-l subdir/'],
+            ['sftpMkdir', 'sftp1', 'private'],
+            ['sftpChdir', 'sftp1', 'private'],
+            ['sftpPut', 'sftp1', 'build.tar.gz', '.', '@buildScripts/build', true],
+            ['sftpExec', 'sftp1', 'tar', '-xzf build.tar.gz'],
+            ['sftpExec', 'sftp1', 'rm', 'build.tar.gz'],
+            ['sftpExec', 'sftp1', 'ls', '-lhA'],
             ['sftpDisconnect', 'sftp1'],
-        ],
-
-        'test_ftp' => [
-            ['sftpConnect', 'ftp1'],
-            ['sftpChdir', 'ftp1', 'deployii_test/files'],
-            ['sftpMkdir', 'ftp1', 'ftp_test'],
-            ['sftpChdir', 'ftp1', 'ftp_test'],
-            ['rmdir', '@buildScripts/build'],
-            ['copyDir', '@workspace', '@buildScripts/build', '', ['except' => ['deployii']]],
-            ['sftpRmdir', 'ftp1', 'build', true],
-            [
-                'sftpPut',
-                'ftp1',
-                ['build', 'test.txt'],
-                '.',
-                '@buildScripts',
-                false
-            ],
-            ['sftpMkdir', 'ftp1', 'subdir'],
-            [
-                'sftpPut',
-                'ftp1',
-                '*',
-                'subdir',
-                '@buildScripts/build',
-                false
-            ],
-            ['sftpRm', 'ftp1', 'subdir/stylesheets/sass/main.scss'],
-            ['rmdir', '@buildScripts/downloaded_ftp'],
-            ['mkdir', '@buildScripts/downloaded_ftp'],
-            ['sftpGet', 'ftp1', 'subdir', '@buildScripts/downloaded_ftp'],
-            ['sftpGet', 'ftp1', 'subdir/index.html', '@buildScripts/downloaded_ftp/index2.html'],
-            ['sftpGet', 'ftp1', 'subdir/index.html', '@buildScripts/downloaded_ftp'], // skipped
-//            ['sftpGet', 'ftp1', 'subdir', '@buildScripts/downloaded_ftp/index.html'], // returns a error
-            ['sftpMkdir', 'ftp1', 'test_perm'],
-            ['sftpChmod', 'ftp1', ['0700' => ['test_perm']]],
-            ['sftpRm', 'ftp1', 'subdir/index2.html'],
-            ['sftpMv', 'ftp1', 'subdir/index.html', 'subdir/index2.html'],
-//            ['sftpExec', 'ftp1', 'touch', 'exec_worked'],
-            ['sftpDisconnect', 'ftp1'],
         ],
 
     ],
