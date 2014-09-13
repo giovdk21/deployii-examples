@@ -23,8 +23,8 @@ return [
 
         'default' => [
             ['target', 'fetch'],
-            ['target', 'test'],
             ['target', 'prepare'],
+            ['target', 'test'],
             ['target', 'package'],
             ['target', 'deploy'],
         ],
@@ -48,12 +48,7 @@ return [
         ],
 
         'prepare' => [
-            ['rm', '@buildScripts/build/web/index-test.php'],
-            ['rm', '@buildScripts/build/composer.json'],
-            ['rm', '@buildScripts/build/requirements.php'],
-            ['rm', '@buildScripts/build/yii'],
-            ['rm', '@buildScripts/build/yii.bat'],
-            ['rmdir', '@buildScripts/build/tests'],
+            ['out', 'At this point we should also run composer...', Console::FG_BLUE],
             [
                 'replaceInFiles',
                 ['index.php'],
@@ -66,6 +61,12 @@ return [
         ],
 
         'package' => [
+            ['rm', '@buildScripts/build/web/index-test.php'],
+            ['rm', '@buildScripts/build/composer.json'],
+            ['rm', '@buildScripts/build/requirements.php'],
+            ['rm', '@buildScripts/build/yii'],
+            ['rm', '@buildScripts/build/yii.bat'],
+            ['rmdir', '@buildScripts/build/tests'],
             ['compress', '@buildScripts/build', '@buildScripts/build/build.tar'],
         ],
 
